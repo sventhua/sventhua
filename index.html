@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Negara-Negara ASEAN</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #2d88bf;
+        }
+
+        #search-bar {
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 1.1em;
+            width: 80%;
+            max-width: 400px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 5px;
+            border: 2px solid #4caf50;
+        }
+
+        .country-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .country-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .country-btn:hover {
+            background-color: #45a049;
+        }
+
+        #country-info {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #country-profile {
+            margin-top: 20px;
+        }
+
+        #mapid {
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Profil Negara-negara ASEAN</h1>
+        <input type="text" id="search-bar" placeholder="Cari negara ASEAN..." oninput="searchCountry(event)" />
+    </header>
+
+    <div class="country-buttons">
+        <button class="country-btn" onclick="showCountry('indonesia')">Indonesia</button>
+        <button class="country-btn" onclick="showCountry('malaysia')">Malaysia</button>
+        <button class="country-btn" onclick="showCountry('singapore')">Singapura</button>
+        <button class="country-btn" onclick="showCountry('cambodia')">Kamboja</button>
+        <button class="country-btn" onclick="showCountry('myanmar')">Myanmar</button>
+        <button class="country-btn" onclick="showCountry('vietnam')">Vietnam</button>
+        <button class="country-btn" onclick="showCountry('thailand')">Thailand</button>
+        <button class="country-btn" onclick="showCountry('philippines')">Filipina</button>
+        <button class="country-btn" onclick="showCountry('brunei')">Brunei Darussalam</button>
+        <button class="country-btn" onclick="showCountry('laos')">Laos</button>
+        <button class="country-btn" onclick="showCountry('timorleste')">Timor Leste</button>
+    </div>
+
+    <div id="country-info">
+        <h2 id="country-name"></h2>
+        <div id="country-profile"></div>
+    </div>
+
+    <div id="mapid"></div>
+
+    <footer>
+        <p>&copy; 2024 Profil Negara ASEAN</p>
+    </footer>
+
+    <script>
+        const countries = {
+            indonesia: {
+                name: "Indonesia",
+                capital: "Jakarta",
+                independenceDay: "17 Agustus 1945",
+                government: "Republik",
+                leader: "Presiden",
+                currency: "Rupiah (IDR)",
+                area: "1.904.569 km²",
+                language: "Bahasa Indonesia",
+                coordinates: [-0.7893, 113.9213],
+            },
+            malaysia: {
+                name: "Malaysia",
+                capital: "Kuala Lumpur",
+                independenceDay: "31 Agustus 1957",
+                government: "Monarki Konstitusional",
+                leader: "Perdana Menteri",
+                currency: "Ringgit Malaysia (MYR)",
+                area: "330.803 km²",
+                language: "Bahasa Melayu",
+                coordinates: [4.2105, 101.9758],
+            },
+            singapore: {
+                name: "Singapura",
+                capital: "Singapura",
+                independenceDay: "9 Agustus 1965",
+                government: "Republik Parlamenter",
+                leader: "Perdana Menteri",
+                currency: "Dolar Singapura (SGD)",
+                area: "728 km²",
+                language: "Bahasa Melayu, Inggris, Mandarin, Tamil",
+                coordinates: [1.3521, 103.8198],
+            },
+            cambodia: {
+                name: "Kamboja",
+                capital: "Phnom Penh",
+                independenceDay: "9 November 1953",
+                government: "Monarki Konstitusional",
+                leader: "Raja",
+                currency: "Riel Kamboja (KHR)",
+                area: "181.035 km²",
+                language: "Khmer",
+                coordinates: [12.5657, 104.9910],
+            },
+            myanmar: {
+                name: "Myanmar",
+                capital: "Naypyidaw",
+                independenceDay: "4 Januari 1948",
+                government: "Republik Parlementer",
+                leader: "Presiden",
+                currency: "Kyat Myanmar (MMK)",
+                area: "676.578 km²",
+                language: "Burma",
+                coordinates: [21.9162, 95.9560],
+            },
+            vietnam: {
+                name: "Vietnam",
+                capital: "Hanoi",
+                independenceDay: "2 September 1945",
+                government: "Republik Sosialis",
+                leader: "Presiden",
+                currency: "Dong Vietnam (VND)",
+                area: "331.690 km²",
+                language: "Vietnam",
+                coordinates: [14.0583, 108.2772],
+            },
+            thailand: {
+                name: "Thailand",
+                capital: "Krung Thep Maha Nakhon",
+                independenceDay: "5 Desember",
+                government: "Kerajaan",
+                leader: "Raja",
+                currency: "Baht Thailand (THB)",
+                area: "513.120 km²",
+                language: "Thai",
+                coordinates: [15.8700, 100.9925],
+            },
+            philippines: {
+                name: "Filipina",
+                capital: "Manila",
+                independenceDay: "12 Juni 1898",
+                government: "Republik Presidensial",
+                leader: "Presiden.",
+                currency: "Peso Filipina (PHP)",
+                area: "300.000 km²",
+                language: "Filipino, Inggris",
+                coordinates: [13.41, 122.56],
+            },
+            brunei: {
+                name: "Brunei Darussalam",
+                capital: "Bandar Seri Begawan",
+                independenceDay: "23 Februari 1984",
+                government: "Monarki Absolut",
+                leader: "Sultan",
+                currency: "Dolar Brunei (BND)",
+                area: "5.765 km²",
+                language: "Bahasa Melayu",
+                coordinates: [4.5353, 114.7277],
+
+            },
+            laos: {
+                name: "Laos",
+                capital: "Vientiane",
+                independenceDay: "2 Desember 1975",
+                government: "Republik",
+                leader: "Presiden",
+                currency: "Kip Laos (LAK)",
+                area: "236.800 km²",
+                language: "Lao",
+                coordinates: [19.8563, 102.4955],
+            },
+            timorleste: {
+                name: "Timor Leste",
+                capital: "Dili",
+                independenceDay: "20 Mei 2002",
+                government: "Republik Parlementer",
+                leader: "Presiden",
+                currency: "Dolar AS (USD)",
+                area: "15.007 km²",
+                language: "Tetum, Portugis",
+                coordinates: [-8.5560, 125.9900],
+            }
+        };
+
+        let map = L.map('mapid').setView([5, 100], 3); // Default view for ASEAN
+        let currentMarker = null; // Variable to hold the current marker
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        L.Control.geocoder().addTo(map); // Adding search control for location
+
+        function showCountry(countryCode) {
+            const country = countries[countryCode];
+
+            if (country) {
+                document.getElementById('country-name').textContent = country.name;
+                document.getElementById('country-profile').innerHTML = `
+                    <p><strong>Ibukota:</strong> ${country.capital}</p>
+                    <p><strong>Hari Kemerdekaan:</strong> ${country.independenceDay}</p>
+                    <p><strong>Bentuk Pemerintahan:</strong> ${country.government}</p>
+                    <p><strong>Pemimpin Negara:</strong> ${country.leader}</p>
+                    <p><strong>Mata Uang:</strong> ${country.currency}</p>
+                    <p><strong>Luas Wilayah:</strong> ${country.area}</p>
+                    <p><strong>Bahasa:</strong> ${country.language}</p>
+                    <p><img src="${country.mapUrl}" alt="Peta ${country.name}" width="300"></p>
+                `;
+                
+                document.getElementById('country-info').style.display = 'block'; // Show country info
+
+                map.setView(country.coordinates, 6); // Set map to the country coordinates
+
+                // Remove the previous marker if it exists
+                if (currentMarker) {
+                    map.removeLayer(currentMarker);
+                }
+
+                // Add new marker
+                currentMarker = L.marker(country.coordinates).addTo(map)
+                    .bindPopup(`<b>${country.name}</b>`).openPopup();
+            }
+        }
+
+        // Implement search functionality
+        function searchCountry(event) {
+            const query = event.target.value.toLowerCase
+            const buttons = document.querySelectorAll('.country-btn');
+            buttons.forEach(button => {
+                const countryName = button.textContent.toLowerCase();
+                if (countryName.includes(query)) {
+                    button.style.display = 'inline-block'; // Show button if it matches the search
+                } else {
+                    button.style.display = 'none'; // Hide button if it doesn't match
+                }
+            });
+        }
+    </script>
+</body>
+</html>
